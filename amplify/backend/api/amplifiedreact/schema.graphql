@@ -8,3 +8,7 @@ type Todo @model {
   description: String!
   isDone: Boolean
 }
+
+type Subscription {
+   newOnUpdateTodo: Todo @aws_subscribe( mutations: ["updateTodo"] )
+}

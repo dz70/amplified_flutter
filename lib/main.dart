@@ -4,6 +4,7 @@ import 'package:amplify_api/amplify_api.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:async';
 
 void main() {
   runApp(const MyApp());
@@ -36,6 +37,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _nameFieldController = TextEditingController();
   final TextEditingController _descriptionFieldController = TextEditingController();
+  StreamSubscription<GraphQLResponse<Todo>>? subscription;
   late List<Todo> _todos;
 
   @override
@@ -51,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
     try{ 
       await Amplify.configure( amplifyconfig );
       await queryListItems();
+      subscribe();
     } on AmplifyAlreadyConfiguredException {
       print( 'Error while initializing Amplify' );
     }
@@ -80,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
     print('Response ::::: $updatedTodo');
   }
-
+  // List the Todos
   Future<List<Todo?>?> queryListItems() async {
     try{
       final request = ModelQueries.list( Todo.classType );
@@ -94,6 +97,20 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     return <Todo?>[];
   } 
+  // Subscription<UpdateTodo>
+  void subscribe() {
+    final subscriptionRequest = ModelSubscriptions.onUpdate( Todo.classType );
+    final Stream<GraphQLResponse<Todo>> operation = Amplify.API.subscribe( 
+      subscriptionRequest, 
+      onEstablished: () => print('Subscription established')
+    );
+    subscription = operation.listen(
+      (event) {
+        print('Subscription event data received: ${event.data}');
+      },
+      onError: ( Object error ) => print('Error in subscription to Stream $error')
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
