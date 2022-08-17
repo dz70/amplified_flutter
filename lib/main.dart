@@ -106,7 +106,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     subscription = operation.listen(
       (event) {
-        print('Subscription event data received: ${event.data}');
+        print('SUBSCRIBTION EVENT DATA RECEIVED ::::: ${event.data}');
+        setState(() {
+          queryListItems();
+        });
       },
       onError: ( Object error ) => print('Error in subscription to Stream $error')
     );
